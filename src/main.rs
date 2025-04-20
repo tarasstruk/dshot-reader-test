@@ -53,8 +53,15 @@ fn main() -> ! {
     let program = pio_proc::pio_asm!(
         ".wrap_target",
         "set x, 1"
+        "reset:",
+        "  set y, 200"
+        "  wait 0 pin 0",
+        "loop:",
+        "  jmp pin reset",
+        "  jmp y-- loop"
         "begin:",
-        "  set pins, 0"
+        "  set pins, 0",
+        "  wait 0 pin 0",
         "  wait 1 pin 0",
         "  nop [5]"
         "  jmp pin one",
@@ -62,9 +69,9 @@ fn main() -> ! {
         "  in null, 1",
         "  jmp begin",
         "one:",
-        "  in x, 1",
         "  set pins, 1"
-        "  wait 0 pin 0",
+        "  in x, 1",
+        "  jmp begin",
         ".wrap"
     );
 
