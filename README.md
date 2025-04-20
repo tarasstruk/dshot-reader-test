@@ -1,6 +1,9 @@
 ## DShot reader test
 
-This binary crate is a minitest for DShot protocol communication.
+This binary crate is part of a test framework for DShot protocol communication.
+
+It is a complementary side to [dshot-writer-test](https://github.com/tarasstruk/dshot-writer-test)
+and implements its consumer counterpart.
 
 For the moment it is tuned for "listening" to DShot 300.
 
