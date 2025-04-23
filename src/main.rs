@@ -109,8 +109,14 @@ fn main() -> ! {
 
     uart.write_full_blocking(b"UART is started\r\n");
 
+    let mut val: u32 = 0;
+
     loop {
         if let Some(value) = rx.read() {
+            if value == val {
+                continue;
+            }
+            val = value;
             let crc = value & 0b1111;
             let throttle = value >> 4;
             let expected_crc = (throttle ^ (throttle >> 4) ^ (throttle >> 8)) & 0b1111;
