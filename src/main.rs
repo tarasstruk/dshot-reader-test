@@ -50,6 +50,7 @@ fn main() -> ! {
     let data_pin_id = pin0.id().num;
     let debug_pin_id = pin1.id().num;
 
+    #[cfg(not(feature = "bidirectional"))]
     let program = pio_proc::pio_asm!(
         ".wrap_target",
         "set x, 1"
@@ -75,6 +76,35 @@ fn main() -> ! {
         ".wrap"
     );
 
+    #[cfg(feature = "bidirectional")]
+    let program = pio_proc::pio_asm!(
+        ".wrap_target",
+        "set x, 1"
+        "begin:",
+        "  set y, 20"
+        "  wait 0 pin 0",
+        "watch:",
+        "  jmp pin begin",
+        "  jmp y-- watch",
+        "  set y, 15"
+        "  wait 1 pin 0",
+        "capture:",
+        "  wait 0 pin 0",
+        "  set pins, 0"
+        "  nop [15]"
+        "  jmp pin zero",
+        "one:",
+        "  set pins, 1",
+        "  in x, 1",
+        "  wait 1 pin 0",
+        "  jmp latch",
+        "zero:",
+        "  in null, 1",
+        "latch:"
+        "  jmp y-- capture",
+        ".wrap"
+    );
+
     // Initialize and start PIO
     let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
     let installed = pio.install(&program.program).unwrap();
@@ -82,7 +112,7 @@ fn main() -> ! {
     // DShot 300 requires a double frequency of the producer.
     // So the clock divisor of the producer is `(50, 0)` we need to use `(25, 0)` here.
     //
-    let (int, frac) = (25, 0);
+    let (int, frac) = (10, 0);
     let (mut sm, mut rx, _) = PIOBuilder::from_installed_program(installed)
         .set_pins(debug_pin_id, 1)
         .jmp_pin(data_pin_id)
@@ -119,7 +149,7 @@ fn main() -> ! {
             val = value;
             let crc = value & 0b1111;
             let throttle = value >> 4;
-            let expected_crc = (throttle ^ (throttle >> 4) ^ (throttle >> 8)) & 0b1111;
+            let expected_crc = !(throttle ^ (throttle >> 4) ^ (throttle >> 8)) & 0b1111;
             let crc_ok = crc == expected_crc;
             let telemetry = throttle & 1;
             let throttle = throttle >> 1;

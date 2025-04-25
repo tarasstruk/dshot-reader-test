@@ -13,3 +13,7 @@ embedded-hal = "1.0.0"
 pio-proc = "0.2"
 pio = "0.2"
 
+[features]
+default = ["bidirectional"]
+
+bidirectional = []
