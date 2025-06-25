@@ -10,6 +10,8 @@ For the moment it is tuned for "listening" to DShot 300.
 The received messages are decoded 
 and can be observed as human-readable logs through a serial terminal.
 
+There is also async variant in [dshot-reader-embassy](https://github.com/tarasstruk/dshot-reader-embassy) to consider.
+
 ### Hardware
 
 On the "publisher side" a sender of DShot data signal
